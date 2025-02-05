@@ -3,154 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>중독성 클릭 게임</title>
+    <title>화려한 버튼과 애니메이션 텍스트</title>
     <style>
         body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: #fff;
-            margin: 50px;
-            overflow: hidden;
-            position: relative;
-        }
-        .container {
-            position: relative;
-            display: inline-block;
-        }
-        .click-button {
-            font-size: 24px;
-            padding: 20px 40px;
-            background: linear-gradient(45deg, #ffcc00, #ff6600);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: transform 0.1s, background 0.5s;
-        }
-        .click-button:active {
-            transform: scale(0.9);
-            background: linear-gradient(45deg, #ff6600, #ffcc00);
-        }
-        .score {
-            font-size: 36px;
-            margin: 20px 0;
-        }
-        .upgrade {
-            background-color: #007bff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+            flex-direction: column;
             color: white;
+            font-family: 'Arial', sans-serif;
+        }
+        .fancy-button {
+            background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #00ff00, #00ffff, #0000ff, #8a00ff);
+            background-size: 400% 400%;
             border: none;
-            padding: 10px 20px;
-            margin: 10px;
+            padding: 15px 30px;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
             cursor: pointer;
-            border-radius: 5px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: glowing 3s infinite alternate;
             transition: transform 0.2s;
         }
-        .upgrade:hover {
+        .fancy-button:hover {
             transform: scale(1.1);
         }
-        .hidden {
-            display: none;
+        @keyframes glowing {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .leaderboard {
+        .text-container {
+            font-size: 24px;
+            font-weight: bold;
             margin-top: 20px;
-            padding: 10px;
-            background: #333;
-            border-radius: 5px;
+            display: flex;
+            gap: 5px;
         }
-        .floating-text {
-            position: absolute;
-            font-size: 20px;
-            color: yellow;
-            opacity: 1;
-            transition: opacity 1s, transform 1s;
+        .letter {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
         }
     </style>
 </head>
 <body>
-    <h1>중독성 클릭 게임</h1>
-    <input type="text" id="playerName" placeholder="플레이어 이름 입력" />
-    <div class="score">점수: <span id="score">0</span></div>
-    <button class="click-button" id="clickBtn">클릭!</button>
-    <div>
-        <button class="upgrade hidden" id="autoClick" onclick="buyAutoClick()">자동 클릭 (100점)</button>
-        <button class="upgrade hidden" id="doublePoints" onclick="buyDoublePoints()">2배 점수 (50점)</button>
-    </div>
-    <div class="leaderboard">
-        <h2>온라인 랭킹</h2>
-        <ul id="ranking"></ul>
-    </div>
-
+    <button class="fancy-button" onclick="startAnimation()">화려한 버튼</button>
+    <div class="text-container" id="text-container"></div>
     <script>
-        let playerName = localStorage.getItem("playerName") || "익명";
-        let score = localStorage.getItem("score") ? parseInt(localStorage.getItem("score")) : 0;
-        let clickValue = 1;
-        let autoClickers = 0;
-        let doublePointsCost = 50;
-        let autoClickCost = 100;
-        let rankings = JSON.parse(localStorage.getItem("rankings")) || {};
-        let autoClickInterval = null;
-
-        document.getElementById("playerName").value = playerName;
-        document.getElementById("score").textContent = score;
-
-        document.getElementById("clickBtn").addEventListener("click", function() {
-            score += clickValue;
-            document.getElementById("score").textContent = score;
-            localStorage.setItem("score", score);
-            updateRanking();
-            checkUpgrades();
-        });
-
-        function checkUpgrades() {
-            if (score >= autoClickCost) document.getElementById("autoClick").classList.remove("hidden");
-            if (score >= doublePointsCost) document.getElementById("doublePoints").classList.remove("hidden");
-        }
-
-        function buyAutoClick() {
-            if (score >= autoClickCost) {
-                score = 0;
-                autoClickers++;
-                autoClickCost *= 2;
-                document.getElementById("autoClick").textContent = `자동 클릭 (${autoClickCost}점)`;
-                document.getElementById("autoClick").classList.add("hidden");
-                startAutoClick();
-            }
-        }
-
-        function startAutoClick() {
-            if (autoClickInterval) clearInterval(autoClickInterval);
-            autoClickInterval = setInterval(() => {
-                score += clickValue * autoClickers;
-                document.getElementById("score").textContent = score;
-                localStorage.setItem("score", score);
-                updateRanking();
-            }, 1000);
-        }
-
-        function buyDoublePoints() {
-            if (score >= doublePointsCost) {
-                score = 0;
-                clickValue *= 2;
-                doublePointsCost *= 5;
-                document.getElementById("doublePoints").textContent = `2배 점수 (${doublePointsCost}점)`;
-                document.getElementById("doublePoints").classList.add("hidden");
-            }
-        }
-
-        function updateRanking() {
-            rankings[playerName] = Math.max(rankings[playerName] || 0, score);
-            localStorage.setItem("rankings", JSON.stringify(rankings));
-            let sortedPlayers = Object.entries(rankings).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            let rankingList = document.getElementById("ranking");
-            rankingList.innerHTML = "";
-            sortedPlayers.forEach(([name, s], i) => {
-                let li = document.createElement("li");
-                li.textContent = `${i + 1}. ${name} - ${s}점`;
-                rankingList.appendChild(li);
+        function startAnimation() {
+            const text = "현수 바보바보거거거거걱ㄱ걱ㄱㄱㅇ;";
+            const container = document.getElementById("text-container");
+            container.innerHTML = ""; 
+            
+            text.split("").forEach((char, index) => {
+                const span = document.createElement("span");
+                span.textContent = char;
+                span.classList.add("letter");
+                container.appendChild(span);
+                
+                setTimeout(() => {
+                    span.style.opacity = 1;
+                    span.style.transform = "translateY(0)";
+                }, index * 150);
             });
         }
-
-        updateRanking();
     </script>
 </body>
 </html>
