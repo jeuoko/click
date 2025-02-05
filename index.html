@@ -3,74 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>화려한 버튼과 애니메이션 텍스트</title>
+    <title>간단한 클릭 게임</title>
     <style>
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #121212;
+            background: linear-gradient(135deg, #ffdde1, #ee9ca7, #ff758c);
             flex-direction: column;
-            color: white;
-            font-family: 'Arial', sans-serif;
+            color: #333;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            padding: 20px;
         }
-        .fancy-button {
-            background: linear-gradient(45deg, #ff0000, #ff7300, #ffeb00, #00ff00, #00ffff, #0000ff, #8a00ff);
-            background-size: 400% 400%;
+        .game-button {
+            background: linear-gradient(45deg, #ff5733, #ffbd69);
             border: none;
-            padding: 15px 30px;
-            font-size: 20px;
+            padding: 20px 40px;
+            font-size: 24px;
             color: white;
             font-weight: bold;
             cursor: pointer;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            animation: glowing 3s infinite alternate;
-            transition: transform 0.2s;
+            box-shadow: 0 0 15px rgba(255, 87, 51, 0.5);
+            transition: transform 0.2s, box-shadow 0.3s;
         }
-        .fancy-button:hover {
+        .game-button:hover {
             transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 87, 51, 0.8);
         }
-        @keyframes glowing {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .text-container {
-            font-size: 24px;
+        .score {
+            font-size: 32px;
             font-weight: bold;
             margin-top: 20px;
-            display: flex;
-            gap: 5px;
+            color: #1e1e1e;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
         }
-        .letter {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s, transform 0.3s;
+        .random-text-container {
+            margin-top: 10px;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .random-text {
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: white;
+            box-shadow: 0 0 10px rgba(106, 17, 203, 0.5);
+            display: inline-block;
         }
     </style>
 </head>
 <body>
-    <button class="fancy-button" onclick="startAnimation()">화려한 버튼</button>
-    <div class="text-container" id="text-container"></div>
+    <button class="game-button" onclick="increaseScore()">클릭하세요!</button>
+    <div class="score" id="score">점수: 0</div>
+    <div class="random-text-container" id="random-text-container"></div>
     <script>
-        function startAnimation() {
-            const text = "현수 바보바보거거거거걱ㄱ걱ㄱㄱㅇ;";
-            const container = document.getElementById("text-container");
-            container.innerHTML = ""; 
+        let score = 0;
+        function increaseScore() {
+            score++;
+            document.getElementById("score").textContent = "점수: " + score;
             
-            text.split("").forEach((char, index) => {
+            if (score % 10 === 0) {
+                const textOptions = ["허", "우", "진"];
+                const randomText = textOptions[Math.floor(Math.random() * textOptions.length)];
+                const container = document.getElementById("random-text-container");
                 const span = document.createElement("span");
-                span.textContent = char;
-                span.classList.add("letter");
+                span.textContent = randomText;
+                span.classList.add("random-text");
                 container.appendChild(span);
-                
-                setTimeout(() => {
-                    span.style.opacity = 1;
-                    span.style.transform = "translateY(0)";
-                }, index * 150);
-            });
+            }
         }
     </script>
 </body>
