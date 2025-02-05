@@ -3,82 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dkdkdkd아아앙앙아아ㅏㅇ앙아아아아아아ㅏ아아아아아아아앙ㅇ아아아아앙아ㅏ아아아ㅏㅇ아ㅏ아아아아아아아아아앙</title>
+    <title>아아아아앙앙ㅇㅇ앙ㅇ 게임</title>
     <style>
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: linear-gradient(135deg, #ffdde1, #ee9ca7, #ff758c);
-            flex-direction: column;
-            color: #333;
-            font-family: 'Comic Sans MS', cursive, sans-serif;
             text-align: center;
-            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #fff;
+            margin: 50px;
+            overflow: hidden;
+            position: relative;
         }
-        .game-button {
-            background: linear-gradient(45deg, #ff5733, #ffbd69);
-            border: none;
-            padding: 20px 40px;
+        .container {
+            position: relative;
+            display: inline-block;
+        }
+        .click-button {
             font-size: 24px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
+            padding: 20px 40px;
+            background: linear-gradient(45deg, #ffcc00, #ff6600);
+            border: none;
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(255, 87, 51, 0.5);
-            transition: transform 0.2s, box-shadow 0.3s;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.5s;
         }
-        .game-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(255, 87, 51, 0.8);
+        .click-button:active {
+            transform: scale(0.9);
+            background: linear-gradient(45deg, #ff6600, #ffcc00);
         }
         .score {
-            font-size: 32px;
-            font-weight: bold;
-            margin-top: 20px;
-            color: #1e1e1e;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 36px;
+            margin: 20px 0;
         }
-        .random-text-container {
-            margin-top: 10px;
-            font-size: 28px;
-            font-weight: bold;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .random-text {
-            padding: 5px 10px;
-            border-radius: 5px;
-            background: linear-gradient(45deg, #6a11cb, #2575fc);
+        .upgrade {
+            background-color: #007bff;
             color: white;
-            box-shadow: 0 0 10px rgba(106, 17, 203, 0.5);
-            display: inline-block;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: transform 0.2s;
+        }
+        .upgrade:hover {
+            transform: scale(1.1);
+        }
+        .hidden {
+            display: none;
+        }
+        .leaderboard {
+            margin-top: 20px;
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+        }
+        .floating-text {
+            position: absolute;
+            font-size: 20px;
+            color: yellow;
+            opacity: 1;
+            transition: opacity 1s, transform 1s;
         }
     </style>
 </head>
 <body>
-    <button class="game-button" onclick="increaseScore()">클릭해</button>
-    <div class="score" id="score">점수: 0</div>
-    <div class="random-text-container" id="random-text-container"></div>
+    <h1>d앙응앙옹아으으앙아아이ㅣ</h1>
+    <input type="text" id="playerName" placeholder="플레이어 이름 입력" />
+    <div class="score">점수: <span id="score">0</span></div>
+    <button class="click-button" id="clickBtn">클릭!</button>
+    <div>
+        <button class="upgrade hidden" id="autoClick" onclick="buyAutoClick()">자동 클릭 (100점)</button>
+        <button class="upgrade hidden" id="doublePoints" onclick="buyDoublePoints()">2배 점수 (50점)</button>
+    </div>
+    <div class="leaderboard">
+        <h2>온라인 랭킹</h2>
+        <ul id="ranking"></ul>
+    </div>
+
     <script>
-        let score = 0;
-        function increaseScore() {
-            score++;
-            document.getElementById("score").textContent = "점수: " + score;
-            
-            if (score % 10 === 0) {
-                const textOptions = ["허", "우", "진"];
-                const randomText = textOptions[Math.floor(Math.random() * textOptions.length)];
-                const container = document.getElementById("random-text-container");
-                const span = document.createElement("span");
-                span.textContent = randomText;
-                span.classList.add("random-text");
-                container.appendChild(span);
+        let playerName = localStorage.getItem("playerName") || "익명";
+        let score = localStorage.getItem("score") ? parseInt(localStorage.getItem("score")) : 0;
+        let clickValue = 1;
+        let autoClickers = 0;
+        let doublePointsCost = 50;
+        let autoClickCost = 100;
+        let rankings = JSON.parse(localStorage.getItem("rankings")) || {};
+        let autoClickInterval = null;
+
+        document.getElementById("playerName").value = playerName;
+        document.getElementById("score").textContent = score;
+
+        document.getElementById("clickBtn").addEventListener("click", function() {
+            score += clickValue;
+            document.getElementById("score").textContent = score;
+            localStorage.setItem("score", score);
+            updateRanking();
+            checkUpgrades();
+        });
+
+        function checkUpgrades() {
+            if (score >= autoClickCost) document.getElementById("autoClick").classList.remove("hidden");
+            if (score >= doublePointsCost) document.getElementById("doublePoints").classList.remove("hidden");
+        }
+
+        function buyAutoClick() {
+            if (score >= autoClickCost) {
+                score = 0;
+                autoClickers++;
+                autoClickCost *= 2;
+                document.getElementById("autoClick").textContent = `자동 클릭 (${autoClickCost}점)`;
+                document.getElementById("autoClick").classList.add("hidden");
+                startAutoClick();
             }
         }
+
+        function startAutoClick() {
+            if (autoClickInterval) clearInterval(autoClickInterval);
+            autoClickInterval = setInterval(() => {
+                score += clickValue * autoClickers;
+                document.getElementById("score").textContent = score;
+                localStorage.setItem("score", score);
+                updateRanking();
+            }, 1000);
+        }
+
+        function buyDoublePoints() {
+            if (score >= doublePointsCost) {
+                score = 0;
+                clickValue *= 2;
+                doublePointsCost *= 5;
+                document.getElementById("doublePoints").textContent = `2배 점수 (${doublePointsCost}점)`;
+                document.getElementById("doublePoints").classList.add("hidden");
+            }
+        }
+
+        function updateRanking() {
+            rankings[playerName] = Math.max(rankings[playerName] || 0, score);
+            localStorage.setItem("rankings", JSON.stringify(rankings));
+            let sortedPlayers = Object.entries(rankings).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            let rankingList = document.getElementById("ranking");
+            rankingList.innerHTML = "";
+            sortedPlayers.forEach(([name, s], i) => {
+                let li = document.createElement("li");
+                li.textContent = `${i + 1}. ${name} - ${s}점`;
+                rankingList.appendChild(li);
+            });
+        }
+
+        updateRanking();
     </script>
 </body>
 </html>
